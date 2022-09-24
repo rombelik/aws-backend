@@ -69,6 +69,19 @@ functions:
     - httpApi:
         path: /products/{id}
         method: get
+        response:
+          headers:
+            Content-Type: "'application/json'"
+          template: $input.path('$')
+          statusCodes:
+            200:
+              pattern: "" # Default response method
+              template: $input.path("$.body")
+            404:
+              pattern: '.*"statusCode":404,.*' # JSON response
+              template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+              headers:
+                Content-Type: "'application/json'"
 
   getProductsList:
     handler: handler.getProductsList
