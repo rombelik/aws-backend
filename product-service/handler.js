@@ -52,6 +52,6 @@
 // };
 
 import { getProductsList } from "./getProductsList"
-import { getProductsById } from "./getProductsListById"
+import { getProductsById } from "./getProductsById"
 
 export { getProductsList, getProductsById }

@@ -2,7 +2,7 @@
 
 import { products } from "./products";
 export const getProductsById = async (event) => {
-    const product = products.filter((el) => el.id === event.pathParameters.id)
+    const product = await products.filter((el) => el.id === event.pathParameters.id)
     try {
       if (product.length === 0) {
         throw new Error()
