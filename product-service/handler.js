@@ -53,5 +53,8 @@
 
 import { getProductsList } from "./getProductsList"
 import { getProductsById } from "./getProductsById"
+import { createDBEntries } from "./createDBEntries"
+import { createProduct } from "./createProduct"
+import { seedEntries } from "./seedEntries"
 
-export { getProductsList, getProductsById }
+export { getProductsList, getProductsById, createDBEntries, createProduct, seedEntries }

@@ -12,9 +12,21 @@ provider:
     cors: true
   }
 
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "*"
+
 plugins:
   - serverless-webpack
   - serverless-auto-swagger
+  - serverless-offline
 
 
 custom:
@@ -38,19 +50,20 @@ functions:
     - httpApi:
         path: /products/{id}
         method: get
-        response:
-          headers:
-            Content-Type: "'application/json'"
-          template: $input.path('$')
-          statusCodes:
-            200:
-              pattern: "" # Default response method
-              template: $input.path("$.body")
-            404:
-              pattern: '.*"statusCode":404,.*' # JSON response
-              template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-              headers:
-                Content-Type: "'application/json'"
+        cors: true
+        # response:
+        #   headers:
+        #     Content-Type: "'application/json'"
+        #   template: $input.path('$')
+        #   statusCodes:
+        #     200:
+        #       pattern: "" # Default response method
+        #       template: $input.path("$.body")
+        #     404:
+        #       pattern: '.*"statusCode":404,.*' # JSON response
+        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+        #       headers:
+        #         Content-Type: "'application/json'"
 
   getProductsList:
     handler: handler.getProductsList
@@ -58,16 +71,112 @@ functions:
     - httpApi:
         path: /products
         method: get
-        response:
-          headers:
-            Content-Type: "'application/json'"
-          template: $input.path('$')
-          statusCodes:
-            200:
-              pattern: "" # Default response method
-              template: $input.path("$.body")
-            404:
-              pattern: '.*"statusCode":404,.*' # JSON response
-              template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-              headers:
-                Content-Type: "'application/json'"
+        cors: true
+        # response:
+        #   headers:
+        #     Content-Type: "'application/json'"
+        #   template: $input.path('$')
+        #   statusCodes:
+        #     200:
+        #       pattern: "" # Default response method
+        #       template: $input.path("$.body")
+        #     404:
+        #       pattern: '.*"statusCode":404,.*' # JSON response
+        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+        #       headers:
+        #         Content-Type: "'application/json'"
+
+  createDBEntries:
+    handler: handler.createDBEntries
+    events:
+    - httpApi:
+        path: /initialize
+        method: get
+        cors: true
+        # response:
+        #   headers:
+        #     Content-Type: "'application/json'"
+        #   template: $input.path('$')
+        #   statusCodes:
+        #     200:
+        #       pattern: "" # Default response method
+        #       template: $input.path("$.body")
+        #     404:
+        #       pattern: '.*"statusCode":404,.*' # JSON response
+        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+        #       headers:
+        #         Content-Type: "'application/json'"
+
+  createProduct:
+    handler: handler.createProduct
+    events:
+    - httpApi:
+        path: /products
+        method: post
+        cors: true
+        # response:
+        #   headers:
+        #     Content-Type: "'application/json'"
+        #   template: $input.path('$')
+        #   statusCodes:
+        #     200:
+        #       pattern: "" # Default response method
+        #       template: $input.path("$.body")
+        #     404:
+        #       pattern: '.*"statusCode":404,.*' # JSON response
+        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+        #       headers:
+        #         Content-Type: "'application/json'"
+
+  seedEntries:
+    handler: handler.seedEntries
+    events:
+    - httpApi:
+        path: /seed
+        method: post
+        cors: true
+        # response:
+        #   headers:
+        #     Content-Type: "'application/json'"
+        #   template: $input.path('$')
+        #   statusCodes:
+        #     200:
+        #       pattern: "" # Default response method
+        #       template: $input.path("$.body")
+        #     404:
+        #       pattern: '.*"statusCode":404,.*' # JSON response
+        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+        #       headers:
+        #         Content-Type: "'application/json'"        
+
+resources:
+  Resources:
+    Products:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: aws_products
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    Stocks:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: aws_stocks
+        AttributeDefinitions:
+          - AttributeName: product_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: product_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+configValidationMode: warn
