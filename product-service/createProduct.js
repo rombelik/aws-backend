@@ -9,8 +9,12 @@ export const createProduct = async (event) => {
   const {title, price, description, count} = body;
   try {    
 
-
-    if (title) {
+    if (title 
+      && typeof title === 'string' 
+      && typeof price === 'number' 
+      && typeof description === 'string'
+      && typeof count === 'number'
+    ) {
       const product = {
         id: uuidv4(),
         title,
