@@ -1,5 +1,6 @@
 'use strict'
 import AWS from 'aws-sdk';
+import { headers } from './headers';
 
 const Client = new AWS.DynamoDB.DocumentClient();
 
@@ -30,6 +31,7 @@ export const getProductsById = async (event) => {
         const { id, title, description, price } = result_product['Item']
   
         return {
+          headers,
           statusCode: 200,
           body: JSON.stringify({
             id,
@@ -41,15 +43,16 @@ export const getProductsById = async (event) => {
         }      
       } else {
         return {
+          headers,
           statusCode: 404,
           body: JSON.stringify({ error: 'Product not found' }, null, 2)
         } 
       };
 
-    }
-    catch(err) {
+    } catch(err) {
       return {
-        statusCode: 404,
+        headers,
+        statusCode: 500,
         body: JSON.stringify(
           {message: `${err}`},
           null,

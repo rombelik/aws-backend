@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const Client = new AWS.DynamoDB.DocumentClient();
 import { products } from "./products"
+import { headers } from './headers';
 
 export const seedEntries = async (event) => {
 const result = []
@@ -45,12 +46,14 @@ const result = []
         }
   
       return {
+        headers,
         statusCode: 201,
         body: JSON.stringify({message: result})
       };
 
     } catch (error) {
         return {
+            headers,
             statusCode: 500,
             body: JSON.stringify({ message: `${error}` })
         }; 

@@ -1,15 +1,14 @@
 import { getProductsById } from "./getProductsById";
-import { products } from "./products"
 
 describe('getProductsById', () => {
     test('get first id from array', async () => {
         const event = {
             pathParameters: {
-              id: products[0]['id']
+              id: "e7a91769-6512-4932-99bf-3e09704db8dc"
             }
           }
         const result = await getProductsById(event)
-        expect(JSON.parse(result.body)[0]['id']).toBe(products[0]['id']);
+        expect(JSON.parse(result.body)[0]['id']).toBe("e7a91769-6512-4932-99bf-3e09704db8dc");
     });
 
     test('get 404 code if wrong id response', async () => {
