@@ -86,27 +86,6 @@ functions:
         #       headers:
         #         Content-Type: "'application/json'"
 
-  createDBEntries:
-    handler: handler.createDBEntries
-    events:
-    - httpApi:
-        path: /initialize
-        method: get
-        cors: true
-        # response:
-        #   headers:
-        #     Content-Type: "'application/json'"
-        #   template: $input.path('$')
-        #   statusCodes:
-        #     200:
-        #       pattern: "" # Default response method
-        #       template: $input.path("$.body")
-        #     404:
-        #       pattern: '.*"statusCode":404,.*' # JSON response
-        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-        #       headers:
-        #         Content-Type: "'application/json'"
-
   createProduct:
     handler: handler.createProduct
     events:
