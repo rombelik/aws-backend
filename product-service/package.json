@@ -8,5 +8,9 @@
   },
   "scripts": {
     "test": "jest --watchAll --coverage"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.183.0",
+    "csv-parser": "^3.0.0"
   }
 }
