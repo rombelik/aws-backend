@@ -1,12 +1,46 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
+// import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
+// import AWS from 'aws-sdk';
+import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { formatJSONResponse } from '@libs/api-gateway';
 import { middyfy } from '@libs/lambda';
+import { headers } from 'src/headers';
 
-const importProductsFile: ValidatedEventAPIGatewayProxyEvent<string> = async (event) => {
-  return formatJSONResponse({
-    message: `Hi ${event.queryStringParameters.name}, welcome to the exciting Serverless world!`,
-    event,
-  });
+import { REGION, BUCKET_NAME } from '../../constants'
+
+export const importProductsFile: APIGatewayProxyHandlerV2<string> = async (event) => {
+
+	try {
+			const fileName = event.queryStringParameters.name
+			console.log(fileName)
+
+			const isFileNameVaild = (name) => {
+				return (typeof name === 'string' && name !== '' && name.split('.').pop() === 'csv')
+			}
+	
+			if (isFileNameVaild(fileName)) {
+				const s3Client = new S3Client({ region: REGION });
+				const params = { 
+					Bucket: BUCKET_NAME, 
+					Key: `uploaded/${fileName}`, 
+					ContentType: 'text/csv',
+					Body: "BODY"
+        		}
+        const command = new PutObjectCommand(params);
+				const url = await getSignedUrl(s3Client, command, { expiresIn: 3600, });
+				return { headers, statusCode: 200, body: JSON.stringify({ url }) }
+			} else {
+				return formatJSONResponse({ statusCode: 400, body: 'File name is not correct' })
+			}
+			
+	  } catch (err) {
+      return {
+        headers,
+        statusCode: 500,
+        body: JSON.stringify({ message: `${err}` })
+      }
+	  }
 };
 
 

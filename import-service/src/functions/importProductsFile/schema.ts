@@ -1,4 +1,4 @@
-export default {
-  type: "string",
-  required: ['name']
-} as const;
+// export default {
+//   type: "string",
+//   required: ['name']
+// } as const;
