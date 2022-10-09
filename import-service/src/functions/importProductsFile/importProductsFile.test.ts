@@ -36,4 +36,11 @@ describe('import products file lambda handler tests', () => {
     expect(res.statusCode).toBe(200);
   });
 
+  it('should return 500 code response if a wrong args passed', async () => {
+    AWS.setSDKInstance(SDK);
+    AWS.mock('S3', 'getSignedUrl', '');
+    const res = await importProductsFile('wrong_argument');
+    expect(res.statusCode).toBe(500);
+  });
+
 });
