@@ -1,0 +1,73 @@
+service: product-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+  stage: dev
+  region: eu-west-1
+  httpApi: {
+    cors: true
+  }
+
+plugins:
+  - serverless-webpack
+  - serverless-auto-swagger
+
+
+custom:
+  webpack:
+    webpackConfig: './webpack.config.js'
+    includeModules: true
+    packager: 'npm'
+    excludeFiles: ["*.d.js","*.d.ts", "*.py"]
+
+  autoswagger:
+    apiType: 'httpApi'
+    host: '23ld61bqe2.execute-api.eu-west-1.amazonaws.com/'
+    typefiles: []
+    schemes: ['http', 'https', 'ws', 'wss']
+    generateSwaggerOnDeploy: false
+    
+functions:
+  getProductsById:
+    handler: handler.getProductsById
+    events:
+    - httpApi:
+        path: /products/{id}
+        method: get
+        response:
+          headers:
+            Content-Type: "'application/json'"
+          template: $input.path('$')
+          statusCodes:
+            200:
+              pattern: "" # Default response method
+              template: $input.path("$.body")
+            404:
+              pattern: '.*"statusCode":404,.*' # JSON response
+              template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+              headers:
+                Content-Type: "'application/json'"
+
+  getProductsList:
+    handler: handler.getProductsList
+    events:
+    - httpApi:
+        path: /products
+        method: get
+        response:
+          headers:
+            Content-Type: "'application/json'"
+          template: $input.path('$')
+          statusCodes:
+            200:
+              pattern: "" # Default response method
+              template: $input.path("$.body")
+            404:
+              pattern: '.*"statusCode":404,.*' # JSON response
+              template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
+              headers:
+                Content-Type: "'application/json'"
