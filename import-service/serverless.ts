@@ -1,6 +1,9 @@
 import type { AWS } from '@serverless/typescript';
 
 import importProductsFile from '@functions/importProductsFile';
+import importFileParser from '@functions/importFileParser';
+
+import { BUCKET_NAME } from './src/constants'
 
 const serverlessConfiguration: AWS = {
   service: 'import-service',
@@ -24,15 +27,56 @@ const serverlessConfiguration: AWS = {
           {
             Effect: 'Allow',
             Action: ['s3:*'],
-            Resource: "arn:aws:s3:::bucketforupload2/*"
+            Resource: `arn:aws:s3:::${BUCKET_NAME}`
           }
         ],
       },
     },
     httpApi: { cors: true, shouldStartNameWithService: true },
   },
+
+  resources: {
+    Resources: {
+      CsvImportBucket: {
+        Type: 'AWS::S3::Bucket',
+        Properties: {
+          BucketName: BUCKET_NAME,
+          AccessControl: 'Private',
+          CorsConfiguration: {
+            CorsRules: [
+              {
+                AllowedHeaders: ['*'],
+                AllowedMethods: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+                AllowedOrigins: ['*'],
+              },
+            ],
+          },
+        },
+      },
+      CsvImportBucketPolicy: {
+        Type: 'AWS::S3::BucketPolicy',
+        Properties: {
+          Bucket: {
+            Ref: 'CsvImportBucket',
+          },
+          PolicyDocument: {
+            Statement: {
+              Sid: 'AllowPublicRead',
+              Effect: 'Allow',
+              Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+              Resource: `arn:aws:s3:::${BUCKET_NAME}/*`,
+              Principal: {
+                AWS: '*',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+
   // import the function via paths
-  functions: { importProductsFile },
+  functions: { importProductsFile, importFileParser },
   package: { individually: true },
   custom: {
     esbuild: {
@@ -44,7 +88,7 @@ const serverlessConfiguration: AWS = {
       define: { 'require.resolve': undefined },
       platform: 'node',
       concurrency: 10,
-    },
+    }
   },
 };
 

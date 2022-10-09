@@ -24,12 +24,11 @@ export const importProductsFile: APIGatewayProxyHandlerV2<string> = async (event
 				const params = { 
 					Bucket: BUCKET_NAME, 
 					Key: `uploaded/${fileName}`, 
-					ContentType: 'text/csv',
-					Body: "BODY"
+					ContentType: 'text/csv'
         		}
         const command = new PutObjectCommand(params);
 				const url = await getSignedUrl(s3Client, command, { expiresIn: 3600, });
-				return { headers, statusCode: 200, body: JSON.stringify({ url }) }
+				return { headers, statusCode: 200, body: JSON.stringify(url) }
 			} else {
 				return formatJSONResponse({ statusCode: 400, body: 'File name is not correct' })
 			}
