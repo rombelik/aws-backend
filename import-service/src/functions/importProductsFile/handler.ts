@@ -1,15 +1,12 @@
-// import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/api-gateway';
-// import AWS from 'aws-sdk';
-import type { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { formatJSONResponse } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
-import { headers } from 'src/headers';
+// import { middyfy } from '@libs/lambda';
+import { headers } from '../../headers';
 
 import { REGION, BUCKET_NAME } from '../../constants'
 
-export const importProductsFile: APIGatewayProxyHandlerV2<string> = async (event) => {
+export const importProductsFile = async (event) => {
 
 	try {
 			const fileName = event.queryStringParameters.name
@@ -34,14 +31,14 @@ export const importProductsFile: APIGatewayProxyHandlerV2<string> = async (event
 			}
 			
 	  } catch (err) {
-      return {
-        headers,
-        statusCode: 500,
-        body: JSON.stringify({ message: `${err}` })
-      }
+		return {
+			headers,
+			statusCode: 500,
+			body: JSON.stringify({ message: `${err.message}` })
+		}
 	  }
 };
 
 
 
-export const main = middyfy(importProductsFile);
+// export const main = middyfy(importProductsFile);
