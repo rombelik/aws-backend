@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { formatJSONResponse } from '@libs/api-gateway';
-// import { middyfy } from '@libs/lambda';
+import { middyfy } from '@libs/lambda';
 import { headers } from '../../headers';
 
 import { REGION, BUCKET_NAME } from '../../constants'
@@ -41,4 +41,4 @@ export const importProductsFile = async (event) => {
 
 
 
-// export const main = middyfy(importProductsFile);
+export const main = middyfy(importProductsFile);

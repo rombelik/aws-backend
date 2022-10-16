@@ -2,6 +2,8 @@ service: product-service
 
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -11,6 +13,10 @@ provider:
   httpApi: {
     cors: true
   }
+
+  environment:
+    SNS_TOPIC_NAME:
+      Ref: createProductTopic
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -23,11 +29,17 @@ provider:
         - dynamodb:DeleteItem
       Resource: "*"
 
+    - Effect: "Allow"
+      Action:
+        - "sns:*"
+      Resource: 
+        Ref: createProductTopic
+
 plugins:
   - serverless-webpack
   - serverless-auto-swagger
   - serverless-offline
-
+  - serverless-dotenv-plugin
 
 custom:
   webpack:
@@ -35,6 +47,7 @@ custom:
     includeModules: true
     packager: 'npm'
     excludeFiles: ["*.d.js","*.d.ts", "*.py"]
+  exportName: 'custom-name-for-queue'
 
   autoswagger:
     apiType: 'httpApi'
@@ -51,19 +64,6 @@ functions:
         path: /products/{id}
         method: get
         cors: true
-        # response:
-        #   headers:
-        #     Content-Type: "'application/json'"
-        #   template: $input.path('$')
-        #   statusCodes:
-        #     200:
-        #       pattern: "" # Default response method
-        #       template: $input.path("$.body")
-        #     404:
-        #       pattern: '.*"statusCode":404,.*' # JSON response
-        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-        #       headers:
-        #         Content-Type: "'application/json'"
 
   getProductsList:
     handler: handler.getProductsList
@@ -72,19 +72,6 @@ functions:
         path: /products
         method: get
         cors: true
-        # response:
-        #   headers:
-        #     Content-Type: "'application/json'"
-        #   template: $input.path('$')
-        #   statusCodes:
-        #     200:
-        #       pattern: "" # Default response method
-        #       template: $input.path("$.body")
-        #     404:
-        #       pattern: '.*"statusCode":404,.*' # JSON response
-        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-        #       headers:
-        #         Content-Type: "'application/json'"
 
   createProduct:
     handler: handler.createProduct
@@ -93,19 +80,6 @@ functions:
         path: /products
         method: post
         cors: true
-        # response:
-        #   headers:
-        #     Content-Type: "'application/json'"
-        #   template: $input.path('$')
-        #   statusCodes:
-        #     200:
-        #       pattern: "" # Default response method
-        #       template: $input.path("$.body")
-        #     404:
-        #       pattern: '.*"statusCode":404,.*' # JSON response
-        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-        #       headers:
-        #         Content-Type: "'application/json'"
 
   seedEntries:
     handler: handler.seedEntries
@@ -114,19 +88,14 @@ functions:
         path: /seed
         method: post
         cors: true
-        # response:
-        #   headers:
-        #     Content-Type: "'application/json'"
-        #   template: $input.path('$')
-        #   statusCodes:
-        #     200:
-        #       pattern: "" # Default response method
-        #       template: $input.path("$.body")
-        #     404:
-        #       pattern: '.*"statusCode":404,.*' # JSON response
-        #       template: $util.parseJson($input.json('$.errorMessage')) # JSON return object
-        #       headers:
-        #         Content-Type: "'application/json'"        
+ 
+  catalogBatchProcess:
+    handler: handler.catalogBatchProcess
+    events:
+    - sqs:
+        batchSize: 5
+        arn: 
+          Fn::GetAtt: [catalogItemsQueue, Arn]
 
 resources:
   Resources:
@@ -157,5 +126,50 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${env:QUEUE_NAME}
+
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${env:TOPIC_NAME}
+
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${env:SNS_SUBSCRIPTION_EMAIL}
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+
+    SNSSubscriptionTooExpensive:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${env:SNS_SUBSCRIPTION_EMAIL_EXPENSIVE}
+        Protocol: email
+        TopicArn:
+          Ref: createProductTopic
+        FilterPolicy:
+          { "event": ["product_created"], "Price": [{ "numeric": [">=", 100] }] }
+
+  Outputs:
+    catalogItemsQueueArn:
+      Description: "Catalog Queue Arn value"
+      Value:
+        Fn::GetAtt:
+          - catalogItemsQueue
+          - Arn
+      Export:
+        Name: custom-name-for-queue-catalogItemsQueueArn
+    catalogItemsQueueUrl:
+      Description: "Catalog Queue Url value"
+      Value:
+        Ref: catalogItemsQueue
+      Export:
+        Name: custom-name-for-queue-catalogItemsQueueUrl          
+
 
 configValidationMode: warn
