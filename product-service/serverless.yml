@@ -18,6 +18,8 @@ provider:
     SNS_TOPIC_NAME:
       Ref: createProductTopic
 
+    SNS_TOPIC_ARN: ${env:TOPIC_ARN}
+
   iamRoleStatements:
     - Effect: "Allow"
       Action:
