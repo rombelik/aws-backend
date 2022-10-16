@@ -23,9 +23,11 @@ const serverlessConfiguration: AWS = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
       SQS_QUEUE_NAME: process.env.SQS_QUEUE_NAME,
-      SQS_QUEUE_URL: {
-        'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueUrl'
-      }
+      // SQS_QUEUE_URL: {
+      //   'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueUrl'
+      // }
+      SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
+      SQS_QUEUE_ARN: process.env.SQS_QUEUE_ARN
 
 
 
@@ -41,9 +43,10 @@ const serverlessConfiguration: AWS = {
           {
             Effect: 'Allow',
             Action: ["sqs:*"],
-            Resource: {
-              'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueArn'
-            }
+            Resource: process.env.SQS_QUEUE_ARN
+            // Resource: {
+            //   'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueArn'
+            // }
           }
         ],
       },

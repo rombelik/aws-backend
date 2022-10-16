@@ -153,7 +153,7 @@ resources:
         TopicArn:
           Ref: createProductTopic
         FilterPolicy:
-          { "event": ["product_created"], "Price": [{ "numeric": [">=", 100] }] }
+          { "event": ["product_created"], "price": [{ "numeric": [">=", 100] }] }
 
   Outputs:
     catalogItemsQueueArn:

@@ -5,7 +5,7 @@ const Client = new AWS.DynamoDB.DocumentClient();
 
 export const createProduct = async (event) => {
   const body = JSON.parse(event.body);
-  console.log(body);
+  console.log('createProduct body', body);
   const {title, price, description, count} = body;
   try {    
 
@@ -51,6 +51,7 @@ export const createProduct = async (event) => {
       };
     
     } else {
+      console.log('product data is invalid')
       return {
         headers,
         statusCode: 400,

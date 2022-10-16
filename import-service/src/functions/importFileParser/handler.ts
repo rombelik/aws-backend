@@ -28,7 +28,7 @@ export const importFileParser = async (event: S3Event) => {
       const transformedStream = await s3Object.pipe(csv());
       const sqs = new AWS.SQS();
       transformedStream.on('data', (parsedData) => {
-        sqs.sendMessage(
+        const sqsResult = sqs.sendMessage(
           {
             MessageBody: JSON.stringify(parsedData),
             QueueUrl: process.env.SQS_QUEUE_URL,
@@ -41,6 +41,7 @@ export const importFileParser = async (event: S3Event) => {
             console.log('transformedStream data:', data);
           }
         );
+        console.log('sqsResult', sqsResult)
       })
       .on('end', async () => {
         console.log(results);
