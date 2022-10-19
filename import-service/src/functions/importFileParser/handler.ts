@@ -25,7 +25,9 @@ export const importFileParser = async (event: S3Event) => {
 			  Key: key
 			}).createReadStream()
 
-      const transformedStream = await s3Object.pipe(csv());
+      const transformedStream = await s3Object.pipe(csv({
+        mapHeaders:({ header }) => header.trim().toLowerCase() 
+      }));
       const sqs = new AWS.SQS();
       transformedStream.on('data', (parsedData) => {
         const sqsResult = sqs.sendMessage(

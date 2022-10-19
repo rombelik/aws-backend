@@ -14,10 +14,11 @@ export const catalogBatchProcess = async (event) => {
           try {
             console.log('record ====>', record)
             const parsedProduct = JSON.parse(record.body);
-            const title = parsedProduct['Title']
-            const price = parsedProduct['Price']
-            const description = parsedProduct['Description']
-            const count = parsedProduct['Count']
+            const { title, price, description, count } = parsedProduct
+            // const title = parsedProduct['Title']
+            // const price = parsedProduct['Price']
+            // const description = parsedProduct['Description']
+            // const count = parsedProduct['Count']
             const product = {
                 id: uuidv4(),
                 title,
