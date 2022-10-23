@@ -1,4 +1,6 @@
 import type { AWS } from '@serverless/typescript';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 import basicAuthorizer from '@functions/basicAuthorizer';
 
@@ -9,6 +11,7 @@ const serverlessConfiguration: AWS = {
   provider: {
     name: 'aws',
     runtime: 'nodejs14.x',
+    region: 'eu-west-1',
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -16,6 +19,7 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+      rombelik: process.env['rombelik'],
     },
   },
   // import the function via paths
