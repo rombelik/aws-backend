@@ -1,4 +1,6 @@
 import type { AWS } from '@serverless/typescript';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 import importProductsFile from '@functions/importProductsFile';
 import importFileParser from '@functions/importFileParser';
@@ -20,6 +22,15 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+      SQS_QUEUE_NAME: process.env.SQS_QUEUE_NAME,
+      // SQS_QUEUE_URL: {
+      //   'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueUrl'
+      // }
+      SQS_QUEUE_URL: process.env.SQS_QUEUE_URL,
+      SQS_QUEUE_ARN: process.env.SQS_QUEUE_ARN
+
+
+
     },
     iam: {
       role: {
@@ -28,6 +39,14 @@ const serverlessConfiguration: AWS = {
             Effect: 'Allow',
             Action: ['s3:*'],
             Resource: `arn:aws:s3:::${BUCKET_NAME}`
+          },
+          {
+            Effect: 'Allow',
+            Action: ["sqs:*"],
+            Resource: process.env.SQS_QUEUE_ARN
+            // Resource: {
+            //   'Fn::ImportValue': 'custom-name-for-queue-catalogItemsQueueArn'
+            // }
           }
         ],
       },

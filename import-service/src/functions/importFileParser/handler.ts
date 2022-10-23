@@ -3,6 +3,7 @@ import { S3Event } from 'aws-lambda';
 import csv from 'csv-parser';
 import { middyfy } from '@libs/lambda';
 import { headers } from '../../headers';
+import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { REGION, UPLOADED, PARSED  } from '../../constants'
 
@@ -16,13 +17,34 @@ export const importFileParser = async (event: S3Event) => {
       const name = record.s3.bucket.name
       const key = record.s3.object.key
       console.log(`Working with backet ${name}, key: ${key}, s3 ${s3}`);
+      console.log('process.env.SQS_QUEUE_URL', process.env.SQS_QUEUE_URL)
+      console.log('test2', process.env.SQS_QUEUE_URL)
       const results = []
 			const s3Object = await s3.getObject({
 			  Bucket: name,
 			  Key: key
 			}).createReadStream()
-      .pipe(csv())
-      .on('data', (data) => results.push(data))
+
+      const transformedStream = await s3Object.pipe(csv({
+        mapHeaders:({ header }) => header.trim().toLowerCase() 
+      }));
+      const sqs = new AWS.SQS();
+      transformedStream.on('data', (parsedData) => {
+        const sqsResult = sqs.sendMessage(
+          {
+            MessageBody: JSON.stringify(parsedData),
+            QueueUrl: process.env.SQS_QUEUE_URL,
+          },
+          (err, data) => {
+            if (err) {
+              console.error('transformedStream error:', err);
+              return;
+            }
+            console.log('transformedStream data:', data);
+          }
+        );
+        console.log('sqsResult', sqsResult)
+      })
       .on('end', async () => {
         console.log(results);
         console.log('results', results);
