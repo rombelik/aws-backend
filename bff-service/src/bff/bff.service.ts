@@ -1,9 +1,12 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, CACHE_MANAGER, Inject } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import axios from 'axios';
 import { product, cart, order, profile } from 'src/constants';
 
 @Injectable()
 export class BffService {
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+
   async getRequest(path, method, body) {
     let url = '';
 
@@ -33,12 +36,34 @@ export class BffService {
       }
     }
 
-    const resp = await axios({
-      method: method,
-      url: url,
-      data: method !== 'GET' ? body : null,
-    });
-    return resp.data;
+    let resp;
+    let getValue;
+    let setValue;
+
+    if (path === 'product' && method === 'GET') {
+      const result = await this.cacheManager.get('productList')
+
+      if (result == (null || undefined)) {
+        console.log('get data from DB ------------------->');
+        resp = await axios({
+          method: method,
+          url: url,
+          data: null,
+        });
+        await this.cacheManager.set('productList', resp.data, 120000);
+        return resp.data;
+      } else {
+        console.log('get data from cache ------------------->');
+        return await this.cacheManager.get('productList');
+      }
+    } else {
+      resp = await axios({
+        method: method,
+        url: url,
+        data: method !== 'GET' ? body : null,
+      });
+      return resp.data;
+    }
   }
 
   async getRequestId(id, path, method, body) {
