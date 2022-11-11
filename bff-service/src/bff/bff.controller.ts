@@ -14,8 +14,6 @@ export class BffController {
     console.log('method=================', method);
     console.log('path=================', path);
     console.log('req=================', req);
-    // const service = params.service;
-    // const url = req.originalUrl.replace(`/${service}`, '');
     const response = await this.bffService.getRequest(path, method, body);
     return response;
   }
@@ -29,8 +27,6 @@ export class BffController {
     console.log('method=================', method);
     console.log('path=================', path);
     console.log('id=================', id);
-    // const service = params.service;
-    // const url = req.originalUrl.replace(`/${service}`, '');
     const response = await this.bffService.getRequestId(id, path, method, body);
     return response;
   }
