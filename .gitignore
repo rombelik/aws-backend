@@ -104,3 +104,10 @@ dist
 .tern-port
 
 bff-service/node_modules
+bff-service/dist
+
+
+# Elastic Beanstalk Files
+bff-service/.elasticbeanstalk/*
+!bff-service/.elasticbeanstalk/*.cfg.yml
+!bff-service/.elasticbeanstalk/*.global.yml
